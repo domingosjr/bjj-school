@@ -132,7 +132,7 @@ src/
 
 6. Instruções de Execução
 1️⃣ Clonar o repositório
-git clone https://github.com/SEU_USUARIO/jj-school.git
+git clone https://github.com/domingosjr/bjj-school.git
 cd jj-school
 
 2️⃣ Instalar dependências
