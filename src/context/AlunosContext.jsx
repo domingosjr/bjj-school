@@ -1,20 +1,56 @@
-import { createContext, useContext, useMemo } from "react";
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  listAlunos,
+  createAluno,
+  updateAluno as apiUpdateAluno,
+  deleteAluno as apiDeleteAluno,
+} from "../services/alunosApi";
 
 const AlunosContext = createContext(null);
 
 export function AlunosProvider({ children }) {
-  const [alunos, setAlunos] = useLocalStorage("jj_alunos", []);
+  const [alunos, setAlunos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState(null);
 
-  const addAluno = ({ nome, faixa, telefone, email, plano }) =>
-    setAlunos(prev => [...prev, { id: Date.now(), nome, faixa, telefone, email, plano }]);
+  async function carregarAlunos() {
+    try {
+      setLoading(true);
+      const data = await listAlunos();
+      setAlunos(data);
+      setErro(null);
+    } catch (e) {
+      console.error("Erro ao carregar alunos", e);
+      setErro("Não foi possível carregar os alunos.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  const deleteAluno = (id) => setAlunos(prev => prev.filter(a => a.id !== id));
+  useEffect(() => {
+    carregarAlunos();
+  }, []);
 
-  const updateAluno = (id, dados) =>
-    setAlunos(prev => prev.map(a => (a.id === id ? { ...a, ...dados } : a)));
+  const addAluno = async ({ nome, faixa, telefone, email, plano }) => {
+    await createAluno({ nome, faixa, telefone, email, plano });
+    await carregarAlunos(); // 🔁 recarrega do banco
+  };
 
-  const value = useMemo(() => ({ alunos, addAluno, deleteAluno, updateAluno }), [alunos]);
+  const deleteAluno = async (id) => {
+    await apiDeleteAluno(id);
+    await carregarAlunos(); // 🔁 recarrega do banco
+  };
+
+  const updateAluno = async (id, dados) => {
+    await apiUpdateAluno(id, dados);
+    await carregarAlunos(); // 🔁 recarrega do banco
+  };
+
+  const value = useMemo(
+    () => ({ alunos, addAluno, deleteAluno, updateAluno, loading, erro }),
+    [alunos, loading, erro]
+  );
+
   return <AlunosContext.Provider value={value}>{children}</AlunosContext.Provider>;
 }
 
