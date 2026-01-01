@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useAlunos } from "../context/AlunosContext";
 import StudentFormFields from "../components/StudentFormFields";
 import StudentsTable from "../components/StudentsTable";
-import { TextField, Button, Stack, Typography, Alert } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Stack, Typography, Alert } from "@mui/material";
 
 const EMPTY = { nome: "", faixa: "", telefone: "", email: "", plano: "" };
 
@@ -16,22 +16,34 @@ export default function Students() {
     erro,
   } = useAlunos();
 
+  const listaAlunos = Array.isArray(alunos) ? alunos : [];
+
   const [editingId, setEditingId] = useState(null);
   const [query, setQuery] = useState("");
   const [form, setForm] = useState(EMPTY);
+  const [showAluno, setShowAluno] = useState(null);
+
+  const handleShow = (id) => {
+    const aluno = listaAlunos.find(a => a.id === id) || null;
+    setShowAluno(aluno);
+  };
+
+  const handleCloseShow = () => {
+    setShowAluno(null);
+  };
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return q
-      ? alunos.filter((a) =>
-          [a.nome, a.faixa, a.plano].some((v) =>
-            (v || "").toLowerCase().includes(q)
-          )
+      ? listaAlunos.filter((a) =>
+        [a.nome, a.faixa, a.plano].some((v) =>
+          (v || "").toLowerCase().includes(q)
         )
-      : alunos;
-  }, [alunos, query]);
+      )
+      : listaAlunos;
+  }, [listaAlunos, query]);
 
-  const alunoEdit = alunos.find((a) => a.id === editingId) || null;
+  const alunoEdit = listaAlunos.find((a) => a.id === editingId) || null;
 
   // sempre que entrar/sair do modo edição, sincroniza o form
   useEffect(() => {
@@ -107,6 +119,7 @@ export default function Students() {
           <hr />
           <StudentsTable
             items={filtered}
+            onShow={handleShow}
             onEdit={(id) => setEditingId(id)}
             onDelete={handleDelete}
           />
@@ -136,6 +149,26 @@ export default function Students() {
           </Button>
         </>
       )}
+      <Dialog open={!!showAluno} onClose={handleCloseShow} maxWidth="sm" fullWidth>
+        <DialogTitle>Detalhes do aluno</DialogTitle>
+
+        <DialogContent dividers>
+          {showAluno && (
+            <Stack spacing={1}>
+              <Typography><b>ID:</b> {showAluno.id}</Typography>
+              <Typography><b>Nome:</b> {showAluno.nome}</Typography>
+              <Typography><b>Faixa:</b> {showAluno.faixa}</Typography>
+              <Typography><b>Telefone:</b> {showAluno.telefone}</Typography>
+              <Typography><b>Email:</b> {showAluno.email}</Typography>
+              <Typography><b>Plano:</b> {showAluno.plano}</Typography>
+            </Stack>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseShow}>Fechar</Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

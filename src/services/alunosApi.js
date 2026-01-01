@@ -1,16 +1,14 @@
 // src/services/alunosApi.js
-import axios from "axios";
-
-const api = axios.create({
-  baseURL: "http://localhost:80909/api",
-});
+import api from "./bjjApi";
 
 // GET /api/alunos
 export async function listAlunos(nome) {
   const response = await api.get("/alunos", {
     params: nome ? { nome } : {},
   });
-  return response.data;
+  // Se vier Page do Spring, usa content. Se vier array, usa direto.
+  const data = response.data;
+  return Array.isArray(data) ? data : (data?.content ?? []);
 }
 
 // GET /api/alunos/{id}

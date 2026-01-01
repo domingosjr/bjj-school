@@ -7,6 +7,7 @@ import { ThemeProvider, CssBaseline } from "@mui/material";
 import App from "./App";
 import { AlunosProvider } from "./context/AlunosContext";
 import { makeTheme } from "./theme/theme";
+import { AuthProvider } from "./context/AuthContext";
 
 function WithTheme({ children }) {
   const mode = useSelector(s => s.ui.mode);
@@ -20,15 +21,17 @@ function WithTheme({ children }) {
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <WithTheme>
-        <BrowserRouter>
+
+  <Provider store={store}>
+    <WithTheme>
+      <BrowserRouter>
+        <AuthProvider>
           <AlunosProvider>
             <App />
           </AlunosProvider>
-        </BrowserRouter>
-      </WithTheme>
-    </Provider>
-  </React.StrictMode>
+        </AuthProvider>
+      </BrowserRouter>
+    </WithTheme>
+  </Provider>
+
 );

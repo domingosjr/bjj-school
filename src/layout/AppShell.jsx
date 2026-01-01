@@ -7,6 +7,7 @@ import { alpha, createTheme, ThemeProvider } from "@mui/material/styles";
 import { NavLink, useNavigate } from "react-router-dom";
 import Brightness4Icon from "@mui/icons-material/Brightness4"; // lua
 import Brightness7Icon from "@mui/icons-material/Brightness7"; // sol
+import LogoutButton from "../components/LogoutButton";
 
 function NavButton({ to, children, end }) {
   return (
@@ -68,7 +69,7 @@ export default function AppShell({ children }) {
           <NavButton to="/alunos">Alunos</NavButton>
           <NavButton to="/comunicados">Comunicados</NavButton>
           <NavButton to="/admin">Admin</NavButton>
-
+          <LogoutButton />
           <IconButton
             onClick={toggleTheme}
             sx={(t) => ({ color: t.palette.primary.contrastText })}

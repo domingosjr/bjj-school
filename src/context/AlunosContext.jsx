@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useAuth } from "./AuthContext"; // ajuste se necessário
 import {
   listAlunos,
   createAluno,
@@ -9,6 +10,8 @@ import {
 const AlunosContext = createContext(null);
 
 export function AlunosProvider({ children }) {
+  const { ready, authenticated } = useAuth();
+
   const [alunos, setAlunos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
@@ -17,7 +20,7 @@ export function AlunosProvider({ children }) {
     try {
       setLoading(true);
       const data = await listAlunos();
-      setAlunos(data);
+      setAlunos(Array.isArray(data) ? data : []);
       setErro(null);
     } catch (e) {
       console.error("Erro ao carregar alunos", e);
@@ -28,22 +31,24 @@ export function AlunosProvider({ children }) {
   }
 
   useEffect(() => {
+    if (!ready) return; // ainda iniciando auth
+    if (!authenticated) return; // não logado (em tese não acontece com login-required)
     carregarAlunos();
-  }, []);
+  }, [ready, authenticated]);
 
   const addAluno = async ({ nome, faixa, telefone, email, plano }) => {
     await createAluno({ nome, faixa, telefone, email, plano });
-    await carregarAlunos(); // 🔁 recarrega do banco
+    await carregarAlunos();
   };
 
   const deleteAluno = async (id) => {
     await apiDeleteAluno(id);
-    await carregarAlunos(); // 🔁 recarrega do banco
+    await carregarAlunos();
   };
 
   const updateAluno = async (id, dados) => {
     await apiUpdateAluno(id, dados);
-    await carregarAlunos(); // 🔁 recarrega do banco
+    await carregarAlunos();
   };
 
   const value = useMemo(

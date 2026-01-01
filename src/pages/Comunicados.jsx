@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getComunicados } from "../services/api";
+import { getComunicados } from "../services/MockApi";
 import { Typography, Alert, CircularProgress, List, ListItem, ListItemText } from "@mui/material";
 
 export default function Comunicados(){
